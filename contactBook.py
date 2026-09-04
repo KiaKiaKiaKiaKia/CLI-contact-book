@@ -1,8 +1,6 @@
-# To do:
-# add, delete, search, edit, list contacts X
-# save and load contacts from a JSON file
-# gui
+import os
 import json
+from time import sleep
 
 class Contact:
 
@@ -15,6 +13,14 @@ class Contact:
         self.number = number
         self.email = email
 
+    def __str__(self):
+            return (
+                f"Name: {self.firstname} {self.lastname}\n"
+                f"Address: {self.address}\n"
+                f"Phone Number: {self.number}\n"
+                f"Email: {self.email}"
+            )
+
     def toDict(self): # convert to dict to pass through json
         return {
             "firstname": self.firstname,
@@ -23,14 +29,6 @@ class Contact:
             "number": self.number,
             "email": self.email,
         }
-
-    def __str__(self):
-        return (
-            f"Name: {self.firstname} {self.lastname}\n"
-            f"Address: {self.address}\n"
-            f"Phone Number: {self.number}\n"
-            f"Email: {self.email}"
-        )
 
     @classmethod 
     def fromDict(cls, data): # convert dict back to object
@@ -43,6 +41,13 @@ class Contact:
         )
 
     @staticmethod
+    def clearScreen():
+        if os.name == 'nt': 
+            os.system('cls') # windows command
+        else:
+            os.system('clear') # unix command
+
+    @staticmethod
     def saveContacts():
         # convert to dicts
         contactDicts = []
@@ -52,7 +57,8 @@ class Contact:
         # save to json
         with open('contacts.json', 'w') as file:
             json.dump(contactDicts, file, indent = 4)
-        print('Contact list saved. \n')
+        print('Saving contact list...\n')
+        sleep(1)
 
     @staticmethod
     def loadContacts():
@@ -65,13 +71,17 @@ class Contact:
 
             for contact in contactDicts:
                 Contact.contacts.append(Contact.fromDict(contact))
-            print('Loaded contact list. \n')
+            print('Loading contact list... \n')
+            sleep(1)
 
         except FileNotFoundError:
             Contact.contacts = []
 
     @staticmethod
     def addContact():
+        Contact.clearScreen()
+        print('------ADD CONTACT------')
+
         firstname = input('Input first name:\n')
         lastname = input('Input last name:\n')
         address = input('Input address:\n')
@@ -90,18 +100,21 @@ class Contact:
             if item.firstname == firstnameInput and item.lastname == lastnameInput:
                 return item
         
-            print('Contact not found.\n')
-            return None
+        print('Contact not found.\n')
+        sleep(2)
+        return None
 
     @staticmethod
     def editContact():
         contact = Contact.getContact()
-
         if contact is None:
             return
         
         edit = True
         while edit == True:
+            Contact.clearScreen()
+            print('------EDIT CONTACT------')
+
             print('Type a number to edit:\n' 
                     '1. Edit first name\n'
                     '2. Edit last name\n'
@@ -135,16 +148,22 @@ class Contact:
                     edit = False
                 case default:
                     print('Invalid input.\n')
+                    input('Press any key to continue.')
 
     @staticmethod
     def deleteContact():
+        Contact.clearScreen()
+        print('------DELETE CONTACT------')
+
         contact = Contact.getContact()
         if contact != None:
             Contact.contacts.remove(contact)
             Contact.saveContacts()
             print('\n'+contact.firstname, contact.lastname, 'deleted from contacts.\n')
+            sleep(2)
         else:
             print('Contact could not be deleted.\n')
+            sleep(2)
 
     @staticmethod
     def listContactDetails(contact):
@@ -154,6 +173,9 @@ class Contact:
     def menu():
         run = True
         while run == True:
+            Contact.clearScreen()
+            print('------CONTACT LIST MENU------')
+
             print('Type a number to navigate: \n'
             '1. Add contact \n'
             '2. Edit contact \n'
@@ -170,30 +192,44 @@ class Contact:
                 case 3:
                     Contact.deleteContact()
                 case 4:
+                    Contact.clearScreen()
+                    print('------CONTACT DETAILS------')
                     print('1. List all contact details\n' \
                     '2. List specific contacts details\n')
                     listChoice = int(input())
+
                     if listChoice == 1:
+                        Contact.clearScreen()
+                        print('------CONTACT DETAILS------')
                         for person in Contact.contacts:
                             print('-----------------------------')
                             Contact.listContactDetails(person)
                         print('-----------------------------')
+                        input('Press any key to return to the menu.')
+
                     elif listChoice == 2:
+                        Contact.clearScreen()
+                        print('------CONTACT DETAILS------')
                         person = Contact.getContact()
                         if person != None:
                             print('-----------------------------')
                             Contact.listContactDetails(person)
                             print('-----------------------------')
+                            input('Press any key to return to the menu.')
                         else:
                             print('Contact details could not be listed.')
+                            input('Press any key to continue.')
+
                     else:
                         print('Invalid input.\n')
+                        sleep(2)
                 case 5:
                     Contact.saveContacts()
                     print('Closing contact book.\n')
                     run = False
                 case default:
                     print('Invalid input.\n')
+                    sleep(2)
 
 Contact.loadContacts()
 Contact.menu()
